@@ -24,4 +24,9 @@ export class UsersService {
         const user = this.userRepo.create({ email, password });
         return this.userRepo.save(user);
     }
+
+    async updateRefreshToken(userId: string, refreshToken: string): Promise<void> {
+        await this.userRepo.update(userId, { refreshToken });
+      }
+      
 }
