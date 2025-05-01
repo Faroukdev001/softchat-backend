@@ -1,7 +1,7 @@
 import { Role } from "src/auth/enums/role.enum";
 import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } from "typeorm";
 
-@Entity('users') 
+@Entity('users')
 export class User {
 
     @PrimaryGeneratedColumn()
@@ -19,7 +19,10 @@ export class User {
     @CreateDateColumn()
     createdAt: Date;
 
-    @Column({ default: Role.USER })
+    @Column({ default: false })
+    isBanned: boolean;
+
+    @Column({ type: 'enum', enum: Role, default: Role.USER })
     role: Role;
 
     @Column({ nullable: true })
