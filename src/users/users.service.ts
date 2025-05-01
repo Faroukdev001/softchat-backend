@@ -20,6 +20,10 @@ export class UsersService {
         return this.userRepo.findOne({ where: { id } });
     }
 
+    async findAll(): Promise<User[]> {
+        return this.userRepo.find();
+    }      
+
     async createUser(email: string, password: string): Promise<User> {
         const user = this.userRepo.create({ email, password });
         return this.userRepo.save(user);
