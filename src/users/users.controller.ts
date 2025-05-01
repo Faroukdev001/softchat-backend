@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
+import { Controller, Get, NotFoundException, Param, UseGuards } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UserResponseDto } from './dto/user-response.dto';
 import { toUserResponseDto } from './user.mapper';
@@ -8,12 +8,21 @@ import { User } from './user.entity';
 import { AuthGuard } from '@nestjs/passport';
 
 @Controller('users')
-@UseGuards(AuthGuard('jwt'))
+@UseGuards(JwtAuthGuard)
 export class UsersController {
     constructor(private userService: UsersService) {}
 
     @Get('/me')
     getMe(@GetUser() user: User): UserResponseDto {
+        return toUserResponseDto(user);
+    }
+
+    @Get(':id')
+    async getUserProfile(@Param('id') id: number): Promise<UserResponseDto> {
+        const user = await this.userService.findById(id);
+        if (!user) {
+            throw new NotFoundException('User not found');
+        }
         return toUserResponseDto(user);
     }
 }
