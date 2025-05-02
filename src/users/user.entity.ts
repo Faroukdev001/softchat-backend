@@ -22,6 +22,12 @@ export class User {
     @Column({ default: false })
     isBanned: boolean;
 
+    @Column({ type: 'text', nullable: true })
+    reason: string | null;    
+
+    @Column({ type: 'timestamp', nullable: true })
+    bannedAt: Date | null;    
+
     @Column({ type: 'enum', enum: Role, default: Role.USER })
     role: Role;
 
