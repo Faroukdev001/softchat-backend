@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Query, UseGuards } from '@nestjs/common';
 import { UsersService } from 'src/users/users.service';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { Role } from 'src/auth/enums/role.enum';
@@ -42,15 +42,15 @@ export class AdminController {
 
   @Patch(':id/ban')
   async banUser(
-    @Param('id') id: number,
-    @Body() { reason }: BanUserDto
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: BanUserDto
   ): Promise<UserResponseDto> {
-    const bannedUser = await this.usersService.banUser(id, reason ?? 'No reason provided');
+    const bannedUser = await this.usersService.banUser(id, dto);
     return toUserResponseDto(bannedUser);
   }
 
   @Patch(':id/unban')
-  async unbanUser(@Param('id') id: number): Promise<UserResponseDto> {
+  async unbanUser(@Param('id', ParseIntPipe) id: number): Promise<UserResponseDto> {
     const restoredUser = await this.usersService.unbanUser(id);
     return toUserResponseDto(restoredUser);
   }
