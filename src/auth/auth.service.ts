@@ -37,6 +37,10 @@ export class AuthService {
             throw new BadRequestException('Invalid credentials');
         }
 
+        if (user.isBanned) {
+            throw new BadRequestException('Your account has been banned. Contact support.');
+        }
+
         const payload = { sub: user.id }; // You can include email/username if needed
         const accessToken = this.jwtService.sign(payload, { expiresIn: '1h' });
         const refreshToken = this.jwtService.sign(payload, { expiresIn: '7d' });
