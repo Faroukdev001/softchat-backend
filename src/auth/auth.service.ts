@@ -68,7 +68,7 @@ export class AuthService {
         }
     
         const payload = { sub: user.id };
-        const newAccessToken = await this.jwtService.signAsync(payload, { expiresIn: '15m' });
+        const newAccessToken = await this.jwtService.signAsync(payload, { expiresIn: '1h' });
         const newRefreshToken = await this.jwtService.signAsync(payload, { expiresIn: '7d' });
     
         await this.usersService.updateRefreshToken(user.id.toString(), await bcrypt.hash(newRefreshToken, 10));
