@@ -37,10 +37,8 @@ export class UsersService {
             skip: (page - 1) * limit,
             order: { createdAt: 'DESC' },
         });
-
         return { data, total };
     }
-
 
     async updateRole(id: number, role: Role): Promise<User> {
         const user = await this.userRepo.findOne({ where: { id } });
