@@ -5,7 +5,8 @@ import * as bcrypt from 'bcrypt';
 
 import { UserResponseDto } from 'src/users/dto/user-response.dto';
 import { toUserResponseDto } from 'src/users/user.mapper';
-import { AuthDto } from './dto/auth.dto';
+import { RegisterDto } from './dto/register.dto';
+import { LoginDto } from './dto/login.dto';
 
 @Injectable()
 export class AuthService {
@@ -14,8 +15,8 @@ export class AuthService {
         private jwtService: JwtService,        
     ) {}
 
-    async register(authDto: AuthDto): Promise<{ message: string, user: UserResponseDto }>{
-        const { email, password } = authDto;
+    async register(registerDto: RegisterDto): Promise<{ message: string, user: UserResponseDto }>{
+        const { name, email, password } = registerDto;
         
         const userExists = await this.usersService.findByEmail(email);
         if (userExists) {
@@ -24,13 +25,13 @@ export class AuthService {
 
         const salt = await bcrypt.genSalt();
         const hashedPassword = await bcrypt.hash(password, salt);
-        const user = await this.usersService.createUser(email, hashedPassword);
+        const user = await this.usersService.createUser(name, email, hashedPassword);
 
         return { message: 'User registered successfully', user: toUserResponseDto(user) };
     }
 
-    async login(authDto: AuthDto): Promise<{ accessToken: string, refreshToken: string, user: UserResponseDto }> {
-        const { email, password } = authDto;
+    async login(loginDto: LoginDto): Promise<{ accessToken: string, refreshToken: string, user: UserResponseDto }> {
+        const { email, password } = loginDto;
         const user = await this.usersService.findByEmail(email);
 
         if(!user || !(await bcrypt.compare(password, user.password))) {
