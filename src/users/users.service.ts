@@ -70,8 +70,8 @@ export class UsersService {
         await this.userRepo.delete(id);
     }
 
-    async createUser(email: string, password: string): Promise<User> {
-        const user = this.userRepo.create({ email, password });
+    async createUser(name: string, email: string, password: string): Promise<User> {
+        const user = this.userRepo.create({ name, email, password });
         return this.userRepo.save(user);
     }
 
