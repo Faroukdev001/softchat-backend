@@ -1,4 +1,5 @@
 import { Role } from "src/auth/enums/role.enum";
+import { Post } from "src/posts/posts.entity";
 import { Product } from "src/products/product.entity";
 import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
@@ -19,6 +20,9 @@ export class User {
 
     @Column({ default: 0 })
     softPoints: number;
+
+    @OneToMany(() => Post, (post) => post.author)
+    posts: Post[];
 
     @CreateDateColumn()
     createdAt: Date;
