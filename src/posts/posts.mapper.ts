@@ -2,6 +2,7 @@
 import { Post } from './posts.entity';
 import { PostResponseDto } from './dto/post-response.dto';
 import { toUserResponseDto } from 'src/users/user.mapper';
+import { Exclude } from 'class-transformer';
 
 export function toPostResponseDto(post: Post): PostResponseDto {
   return {
@@ -9,7 +10,6 @@ export function toPostResponseDto(post: Post): PostResponseDto {
     content: post.content,
     imageUrl: post.imageUrl ?? '',
     createdAt: post.createdAt,
-    updatedAt: post.updatedAt,
-    author: toUserResponseDto(post.author),
+    updatedAt: post.updatedAt
   };
 }
