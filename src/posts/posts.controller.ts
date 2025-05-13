@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Put, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, Get, NotFoundException, Param, ParseIntPipe, Patch, Post, Put, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { GetUser } from 'src/auth/decorators/get-user.decorator';
 import { CreatePostDto } from './dto/create-post.dto';
@@ -9,6 +9,10 @@ import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { PostResponseDto } from './dto/post-response.dto';
 import { toPostResponseDto } from './posts.mapper';
+import { UpdatePostDto } from './dto/update-post.dto';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { Role } from 'src/auth/enums/role.enum';
+import { Roles } from 'src/auth/decorators/roles.decorator';
 
 @Controller('posts')
 @UseGuards(JwtAuthGuard)
@@ -34,24 +38,45 @@ export class PostsController {
     return toPostResponseDto(post);
   }
 
-
+  @UseGuards(RolesGuard)
+  @Roles(Role.ADMIN)
   @Get()
   async findAll() {
-    return this.postsService.findAllPosts();
+    const post = this.postsService.findAllPosts();
+    return (await post).map((post) => toPostResponseDto(post));
+  }
+
+  @Get('user/:id')
+  @UseGuards(RolesGuard)
+  @Roles(Role.ADMIN)
+  async findPostsByUserId(@Param('id', ParseIntPipe) id: number) {
+    const posts = await this.postsService.findPostsByUserId(id);
+    if (!posts.length) {
+      throw new NotFoundException('No posts found for this user');
+    }
+    return posts.map((post) => toPostResponseDto(post));
+  }
+
+  @Get('my-posts')
+  async findMyPosts(@GetUser() user: User) {
+    const posts = await this.postsService.findMyPosts(user.id);
+    return posts.map((post) => toPostResponseDto(post));
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string) {
-    return this.postsService.findOnePost(+id);
+  async findOne(@Param('id', ParseIntPipe) id: number) {
+    const post = this.postsService.findOnePost(id);
+    return toPostResponseDto(await post);
   }
 
   @Patch(':id')
   async updatePost(
-    @Param('id') id: string,
-    @Body() updatePostDto: CreatePostDto,
+    @Param('id') id: number,
+    @Body() updatePostDto: UpdatePostDto,
     @GetUser() user: User,
   ) {
-    return this.postsService.updatePost(+id, updatePostDto, user);
+    const post = this.postsService.updatePost(id, updatePostDto, user);
+    return toPostResponseDto(await post);
   }
 
   @Delete(':id')
