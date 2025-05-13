@@ -1,6 +1,7 @@
 import { Role } from "src/auth/enums/role.enum";
 import { Post } from "src/posts/posts.entity";
 import { Product } from "src/products/product.entity";
+import { Comment } from "src/comments/comment.entity";
 import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity('users')
@@ -23,6 +24,9 @@ export class User {
 
     @OneToMany(() => Post, (post) => post.author)
     posts: Post[];
+
+    @OneToMany(() => Comment, (comment) => comment.author)
+    comments: Comment[];
 
     @CreateDateColumn()
     createdAt: Date;
