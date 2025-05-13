@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Post } from './posts.entity';
 import { Repository } from 'typeorm';
@@ -21,9 +21,24 @@ export class PostsService {
         });
       
         return await this.postRepository.save(post);
-      }
-      
+    }
 
+    async findPostsByUserId(userId: number): Promise<Post[]> {
+        return this.postRepository.find({
+            where: { author: { id: userId } },
+            relations: ['author'],
+            order: { createdAt: 'DESC' },
+        });
+    }
+
+    async findMyPosts(userId: number): Promise<Post[]> {
+        return this.postRepository.find({
+            where: { author: { id: userId } },
+            relations: ['author'],
+            order: { createdAt: 'DESC' },
+        });
+    }
+      
     async findAllPosts(): Promise<Post[]> {
         return this.postRepository.find({ relations: ['author'], order: { createdAt: 'DESC' } });
     }
@@ -39,7 +54,7 @@ export class PostsService {
     async updatePost(id: number, updatePostDto: UpdatePostDto, user: User): Promise<Post> {
         const post = await this.findOnePost(id);
         if (post.author.id !== user.id) {
-            throw new NotFoundException('You are not authorized to update this post');
+            throw new ForbiddenException('You are not authorized to update this post');
         }
         Object.assign(post, updatePostDto);
         return this.postRepository.save(post);
@@ -48,7 +63,7 @@ export class PostsService {
     async deletePost(id: number, user: User): Promise<void> {
         const post = await this.findOnePost(id);
         if (post.author.id !== user.id) {
-            throw new NotFoundException('You are not authorized to delete this post');
+            throw new ForbiddenException('You are not authorized to delete this post');
         }
         await this.postRepository.remove(post);
     }
