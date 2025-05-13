@@ -1,9 +1,13 @@
+import { Exclude } from "class-transformer";
+
 export class UserResponseDto {
     id: number;
     email: string;
     softPoints: number;
     createdAt: Date;
-    role: string;
-    isBanned: boolean;
+    @Exclude()
+    role?: string;
+    @Exclude()
+    isBanned?: boolean;
   }
   

@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './user.entity';
 import { Like, Repository } from 'typeorm';
 import { Role } from 'src/auth/enums/role.enum';
+import { BanUserDto } from './dto/ban-user.dto';
 
 
 // Database Layer
@@ -36,10 +37,8 @@ export class UsersService {
             skip: (page - 1) * limit,
             order: { createdAt: 'DESC' },
         });
-
         return { data, total };
     }
-
 
     async updateRole(id: number, role: Role): Promise<User> {
         const user = await this.userRepo.findOne({ where: { id } });
@@ -48,10 +47,13 @@ export class UsersService {
         return this.userRepo.save(user);
     }
 
-    async banUser(id: number, reason: string): Promise<User> {
+    async banUser(id: number, dto: BanUserDto): Promise<User> {
         const user = await this.userRepo.findOne({ where: { id } });
         if (!user) throw new NotFoundException('User not found');
-        user.isBanned = true;
+
+        user.isBanned = dto.isBanned;
+        user.reason = dto.reason || null;
+        user.bannedAt = dto.isBanned ? new Date() : null;
         return this.userRepo.save(user);
     }
 
@@ -59,16 +61,17 @@ export class UsersService {
         const user = await this.userRepo.findOne({ where: { id } });
         if (!user) throw new NotFoundException('User not found');
         user.isBanned = false;
+        user.reason = null;
+        user.bannedAt = null;
         return this.userRepo.save(user);
     }
-
 
     async deleteUser(id: string): Promise<void> {
         await this.userRepo.delete(id);
     }
 
-    async createUser(email: string, password: string): Promise<User> {
-        const user = this.userRepo.create({ email, password });
+    async createUser(name: string, email: string, password: string): Promise<User> {
+        const user = this.userRepo.create({ name, email, password });
         return this.userRepo.save(user);
     }
 
