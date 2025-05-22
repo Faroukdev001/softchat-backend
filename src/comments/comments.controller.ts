@@ -28,6 +28,11 @@ import {
     ) {
       return this.commentsService.createComment(createDto, user);
     }
+
+    @Get('post/:postId')
+    getByPost(@Param('postId', ParseIntPipe) postId: number) {
+      return this.commentsService.getCommentsByPost(postId);
+    }
   
     @Patch(':id')
     update(
@@ -46,9 +51,5 @@ import {
       return this.commentsService.deleteComment(id, user);
     }
   
-    @Get('post/:postId')
-    getByPost(@Param('postId', ParseIntPipe) postId: number) {
-      return this.commentsService.getCommentsByPost(postId);
-    }
   }
   
