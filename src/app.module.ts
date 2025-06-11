@@ -4,9 +4,9 @@ import { typeOrmConfig } from './config/typeorm.config';
 import { ConfigModule } from '@nestjs/config';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
-import { AdminModule } from './admin/admin.module';
+// import { AdminModule } from './admin/admin.module';
 import { ProductsModule } from './products/products.module';
-import { PostsModule } from './posts/posts.module';
+// import { PostsModule } from './posts/posts.module';
 import { CommentsModule } from './comments/comments.module';
 
 @Module({
@@ -16,9 +16,9 @@ import { CommentsModule } from './comments/comments.module';
     TypeOrmModule.forRoot(typeOrmConfig),
     UsersModule,
     AuthModule,
-    AdminModule,
+    // AdminModule,
     ProductsModule,
-    PostsModule,
+    // PostsModule,
     CommentsModule,
   ],
 })

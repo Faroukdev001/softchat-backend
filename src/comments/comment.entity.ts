@@ -9,6 +9,7 @@ import {
   } from 'typeorm';
   import { User } from 'src/users/user.entity';
   import { Post } from 'src/posts/posts.entity';
+// import { CommentLike } from './commentLikes.entity';
   
   @Entity()
   export class Comment {
@@ -24,15 +25,15 @@ import {
     @ManyToOne(() => Post, (post) => post.comments, { onDelete: 'CASCADE' })
     post: Post;
   
-    @ManyToOne(() => Comment, (comment) => comment.replies, { nullable: true })
-    parent: Comment;
+    @ManyToOne(() => Comment, (comment) => comment.replies, { onDelete: 'CASCADE' })
+    parentComment?: Comment;
   
-    @OneToMany(() => Comment, (comment) => comment.parent)
+    @OneToMany(() => Comment, (comment) => comment.parentComment)
     replies: Comment[];
   
-    @Column({ default: 0 })
-    likes: number;
-  
+    // @OneToMany(() => CommentLike, (like) => like.comment)
+    // likes: CommentLike[];
+
     @CreateDateColumn()
     createdAt: Date;
   

@@ -4,7 +4,7 @@ import {
     ForbiddenException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { IsNull, Repository } from 'typeorm';
 import { Comment } from './comment.entity';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
@@ -19,6 +19,9 @@ export class CommentsService {
 
         @InjectRepository(Post)
         private postRepo: Repository<Post>,
+
+        @InjectRepository(User)
+        private userRepo: Repository<User>,
     ) { }
 
     async createComment(createDto: CreateCommentDto, user: User): Promise<Comment> {
@@ -45,7 +48,7 @@ export class CommentsService {
                 throw new NotFoundException('Parent comment not found');
             }
 
-            comment.parent = parent;
+            comment.parentComment = parent;
         }
 
         return this.commentRepo.save(comment);
@@ -80,9 +83,9 @@ export class CommentsService {
 
     async getCommentsByPost(postId: number): Promise<Comment[]> {
         return this.commentRepo.find({
-            where: { post: { id: postId } },
-            relations: ['author', 'parent'],
-            order: { createdAt: 'ASC' },
+            where: { post: { id: postId }, parentComment: IsNull() },
+            relations: ['author', 'replies', 'parentComment'],
+            order: { createdAt: 'DESC' },
         });
     }
 }

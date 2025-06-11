@@ -39,7 +39,6 @@ export class PostsController {
   }
 
   @UseGuards(RolesGuard)
-  @Roles(Role.ADMIN)
   @Get()
   async findAll() {
     const post = this.postsService.findAllPosts();
