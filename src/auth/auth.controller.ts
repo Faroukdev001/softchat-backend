@@ -1,7 +1,8 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post, Get } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { User } from 'src/users/user.entity';
 
 @Controller('auth')
 export class AuthController {
@@ -15,6 +16,15 @@ export class AuthController {
     @Post('/login')
     async login(@Body() loginDto: LoginDto) {
         return this.authService.login(loginDto);
+    }
+
+    @Post('/create-dummy-users')
+    async createDummyUsers(): Promise<{ message: string, users: User[] }> {
+        const users = await this.authService.createDummyUsers();
+        return {
+            message: 'Successfully created 5 dummy users',
+            users
+        };
     }
 
     @Post('/refresh')
