@@ -1,6 +1,6 @@
 // src/posts/post.mapper.ts
 import { Post } from './posts.entity';
-import { PostResponseDto } from './dto/post-response.dto';
+import { PostResponseDto } from './dto/post-info.dto';
 import { toUserResponseDto } from 'src/users/user.mapper';
 import { Exclude } from 'class-transformer';
 
