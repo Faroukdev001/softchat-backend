@@ -36,7 +36,7 @@ export class PostRepository extends Repository<Post> {
         const postInfo: PostInfoDto = new PostInfoDto();
         postInfo.id = post.id;
         postInfo.description = post.description;
-        // postInfo.status = post.status;
+        // postInfo.status = post.status54  ;
         postInfo.user = new UserInfoDto();
         postInfo.user.email = post.user.email;
         postInfo.user.username = post.user.username;
