@@ -25,14 +25,14 @@ export class User extends BaseEntity{
     // @OneToMany(() => Post, (post) => post.author)
     // posts: Post[];
 
-    // @OneToMany(() => Post, post => post.user, { eager: true })
-    // @JoinColumn([{ name: 'postId', referencedColumnName: 'id' }])
-    // posts: Post[];
+    @OneToMany(() => Post, post => post.user, { eager: true })
+    @JoinColumn([{ name: 'postId', referencedColumnName: 'id' }])
+    posts: Post[];
 
     @Column({ default: `/images/default/dafault_thumbnail.png` })
     thumbnail: string;
 
-    @Column('int', { array: true, nullable: false })
+    @Column('int', { array: true, default: [] })
     bookMarks: number[];
 
     @Column({ default: "" })

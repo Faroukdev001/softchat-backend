@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module';
 import { ProductsModule } from './products/products.module';
 // import { PostsModule } from './posts/posts.module';
 import { CommentsModule } from './comments/comments.module';
+import { PostsModule } from './posts/posts.module';
 
 @Module({
   imports: [
@@ -18,7 +19,7 @@ import { CommentsModule } from './comments/comments.module';
     AuthModule,
     // AdminModule,
     ProductsModule,
-    // PostsModule,
+    PostsModule,
     CommentsModule,
   ],
 })
