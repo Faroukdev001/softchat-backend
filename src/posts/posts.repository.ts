@@ -44,7 +44,7 @@ export class PostRepository extends Repository<Post> {
         postInfo.imageUrl = post.imageUrl;
         postInfo.isLiked = false;
         postInfo.isBookmarked = false;
-        // postInfo.commentCount = post.commentCount;
+        postInfo.commentCount = post.commentCount;
 
         return postInfo;
     }
@@ -52,8 +52,8 @@ export class PostRepository extends Repository<Post> {
     async getPostListByUser(email: string, page: number, limit: number): Promise<PostResponse> {
         const query = this.createQueryBuilder('post')
             .leftJoinAndSelect('post.user', 'user')
-            // .leftJoin('post.comments', 'comment_entity')
-            // .loadRelationCountAndMap('post.commentCount', 'post.comments')
+            .leftJoin('post.comments', 'comment_entity')
+            .loadRelationCountAndMap('post.commentCount', 'post.comments')
             .where('user.email = :email', { email })
             .select([
                 'post.id',
@@ -65,7 +65,7 @@ export class PostRepository extends Repository<Post> {
                 'user.username',
                 'user.email',
                 'user.thumbnail',
-                // 'COUNT(comment_entity.id) as commentCount',
+                'COUNT(comment_entity.id) as commentCount',
             ])
             .groupBy('post.id')
             .addGroupBy('post.description')
@@ -97,7 +97,7 @@ export class PostRepository extends Repository<Post> {
             postInfo.likeCount = post.likes.length;
             postInfo.isLiked = post.likes.includes(email);
             postInfo.isBookmarked = post.bookMarkedUsers.includes(email);
-            // postInfo.commentCount = post.commentCount;
+            postInfo.commentCount = post.commentCount;
             return postInfo;
         });
 
@@ -108,8 +108,8 @@ export class PostRepository extends Repository<Post> {
 
         const query = this.createQueryBuilder('post')
             .leftJoinAndSelect('post.user', 'user')
-            // .leftJoin('post.comments', 'comment_entity')
-            // .loadRelationCountAndMap('post.commentCount', 'post.comments')
+            .leftJoin('post.comments', 'comment_entity')
+            .loadRelationCountAndMap('post.commentCount', 'post.comments')
             .select([
                 'post.id',
                 'post.description',
@@ -120,7 +120,7 @@ export class PostRepository extends Repository<Post> {
                 'user.username',
                 'user.email',
                 'user.thumbnail',
-                // 'COUNT(comment_entity.id) as commentCount',
+                'COUNT(comment_entity.id) as commentCount',
             ])
             .groupBy('post.id')
             .addGroupBy('user.email')
@@ -159,8 +159,8 @@ export class PostRepository extends Repository<Post> {
         const post = await this
             .createQueryBuilder('post')
             .leftJoinAndSelect('post.user', 'user')
-            // .leftJoin('post.comments', 'comment_entity')
-            // .loadRelationCountAndMap('post.commentCount', 'post.comments')
+            .leftJoin('post.comments', 'comment_entity')
+            .loadRelationCountAndMap('post.commentCount', 'post.comments')
             .where('post.id = :id', { id: updatePostDescriptionDto.postId })
             .select([
                 'post.id',
