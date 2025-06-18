@@ -8,48 +8,76 @@ import {
     Get,
     UseGuards,
     ParseIntPipe,
+    Query,
   } from '@nestjs/common';
-  import { CommentsService } from './comments.service';
+  import { CommentService } from './comments.service';
   import { CreateCommentDto } from './dto/create-comment.dto';
+import { CreateDummyCommentsDto } from './dto/create-dummy-comments.dto';
   import { UpdateCommentDto } from './dto/update-comment.dto';
   import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
   import { GetUser } from 'src/auth/decorators/get-user.decorator';
   import { User } from 'src/users/user.entity';
+import { CommentInfoDto, CommentInfoListDto } from './dto/comment-info.dto';
+import { CreateDummyCommentDto } from './dto/create-dummy-comment.dto';
   
   @UseGuards(JwtAuthGuard)
   @Controller('comments')
   export class CommentsController {
-    constructor(private readonly commentsService: CommentsService) {}
+    constructor(private commentService: CommentService) {}
+
+    @Post('dummy')
+    createDummyComments(
+        @Body() createDummyCommentsDto: CreateDummyCommentsDto,
+        @GetUser() user: User,
+    ): Promise<{ message: string }> {
+        return this.commentService.createDummyComments(createDummyCommentsDto, user);
+    }
   
-    @Post()
-    create(
-      @Body() createDto: CreateCommentDto,
-      @GetUser() user: User,
-    ) {
-      return this.commentsService.createComment(createDto, user);
+    @Post('/')
+    createComment(
+        @Body() createCommentDto: CreateCommentDto, 
+        @GetUser() user: User,
+    ): Promise<CommentInfoDto> {
+        return this.commentService.createComment(createCommentDto, user);
     }
 
-    @Get('post/:postId')
-    getByPost(@Param('postId', ParseIntPipe) postId: number) {
-      return this.commentsService.getCommentsByPost(postId);
+    @Get('/')
+    getCommentList(
+        @Query('postId', ParseIntPipe) postId: number,
+        @Query('page', ParseIntPipe) page: number,
+        @Query('limit', ParseIntPipe) limit: number,
+    ): Promise<CommentInfoListDto> {
+        return this.commentService.getCommentList(postId, page, limit);
     }
-  
-    @Patch(':id')
-    update(
-      @Param('id', ParseIntPipe) id: number,
-      @Body() updateDto: UpdateCommentDto,
-      @GetUser() user: User,
-    ) {
-      return this.commentsService.updateComment(id, updateDto, user);
+
+    @Get('/reply')
+    getReplyListByParentCommentId(
+        @Query('parentCommentId', ParseIntPipe) parentCommentId: number,
+        @Query('postId', ParseIntPipe) postId: number,
+        @Query('page', ParseIntPipe) page: number,
+        @Query('limit', ParseIntPipe) limit: number,
+    ): Promise<CommentInfoListDto> {
+        return this.commentService.getReplyListByParentCommentId(parentCommentId, postId, page, limit);
     }
-  
-    @Delete(':id')
-    remove(
-      @Param('id', ParseIntPipe) id: number,
-      @GetUser() user: User,
-    ) {
-      return this.commentsService.deleteComment(id, user);
+
+    @Patch('/')
+    updateComment(
+        @Body() updateCommentDto: UpdateCommentDto,
+        @GetUser() user: User,
+    ): Promise<CommentInfoDto> {
+        return this.commentService.updateComment(updateCommentDto, user);
     }
+
   
+    @Delete('/:id')
+    deleteComment(
+        @Param('id', ParseIntPipe) id: number,
+        @GetUser() user: User,
+    ): Promise<void> {
+        return this.commentService.deleteComment(id, user);
+    }
+
+
+
   }
   
