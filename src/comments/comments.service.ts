@@ -1,91 +1,89 @@
-import {
-    Injectable,
-    NotFoundException,
-    ForbiddenException,
-} from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { IsNull, Repository } from 'typeorm';
-import { Comment } from './comment.entity';
+import { Injectable, Logger, NotFoundException } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { CommentRepository } from "./comment.repository";
 import { CreateCommentDto } from './dto/create-comment.dto';
-import { UpdateCommentDto } from './dto/update-comment.dto';
-import { Post } from 'src/posts/posts.entity';
-import { User } from 'src/users/user.entity';
+import { CreateDummyCommentsDto } from './dto/create-dummy-comments.dto';
+import { faker } from '@faker-js/faker';
+import { CommentInfoDto, CommentInfoListDto } from "./dto/comment-info.dto";
+import { UpdateCommentDto } from "./dto/update-comment.dto";
+import { AuthRepository } from "src/auth/auth.repository";
+import { PostRepository } from "src/posts/posts.repository";
+import { UserRepository } from "src/users/user.repository";
+import { User } from "src/users/user.entity";
+import { Post } from "src/posts/posts.entity";
 
 @Injectable()
-export class CommentsService {
+export class CommentService {
     constructor(
-        @InjectRepository(Comment)
-        private commentRepo: Repository<Comment>,
+        @InjectRepository(PostRepository)
+        private postRepository: PostRepository,
+        @InjectRepository(CommentRepository)
+        private commentRepository: CommentRepository,
+        @InjectRepository(UserRepository)
+        private userRepository: UserRepository,
+        @InjectRepository(AuthRepository)
+        private authRepository: AuthRepository) { }
 
-        @InjectRepository(Post)
-        private postRepo: Repository<Post>,
+    async createDummyComments(createDummyCommentsDto: CreateDummyCommentsDto, user: User): Promise<{ message: string }> {
+        const { postId, commentCount, repliesPerComment = 2 } = createDummyCommentsDto;
+        const post = await this.getPostById(postId);
 
-        @InjectRepository(User)
-        private userRepo: Repository<User>,
-    ) { }
+        for (let i = 0; i < commentCount; i++) {
+            const commentDto = new CreateCommentDto();
+            commentDto.content = faker.lorem.sentence();
+            commentDto.postId = postId;
+            const comment = await this.createComment(commentDto, user);
 
-    async createComment(createDto: CreateCommentDto, user: User): Promise<Comment> {
-        const post = await this.postRepo.findOne({where: { id: createDto.postId },
-        });
+            for (let j = 0; j < repliesPerComment; j++) {
+                const replyDto = new CreateCommentDto();
+                replyDto.content = faker.lorem.sentence();
+                replyDto.postId = postId;
+                replyDto.parentCommentId = comment.id;
+                replyDto.parentCommentAuthor = user.email;
+                await this.createComment(replyDto, user);
+            }
+        }
+
+        return { message: `Created ${commentCount} comments with ${repliesPerComment} replies each` };
+    }
+
+
+    async createComment(createCommentDto: CreateCommentDto, user: User): Promise<CommentInfoDto> {
+        const post = await this.getPostById(createCommentDto.postId);
+        return await this.commentRepository.createComment(createCommentDto, user, post);
+    }
+
+    async getCommentList(postId: number, page: number, limit: number): Promise<CommentInfoListDto> {
+        return await this.commentRepository.getCommentList(postId, page, limit);
+    }
+
+    async getReplyListByParentCommentId(parentCommentId: number, postId: number, page: number, limit: number): Promise<CommentInfoListDto> {
+        return await this.commentRepository.getReplyListByParentCommentId(parentCommentId, postId, page, limit);
+    }
+
+    async updateComment(updateCommentDto: UpdateCommentDto, user: User): Promise<CommentInfoDto> {
+        return await this.commentRepository.updateComment(updateCommentDto, user);
+    }
+
+    async deleteComment(
+        id: number,
+        user: User,
+    ): Promise<void> {
+        const result = await this.commentRepository.delete({ id, user });
+
+        if (result.affected === 0) {
+            throw new NotFoundException(`Can't find comment with id ${id}`);
+        }
+    }
+
+    async getPostById(id: number): Promise<Post> {
+        const post = await this.postRepository.findOne({ where: { id } });
 
         if (!post) {
-            throw new NotFoundException('Post not found');
+            throw new NotFoundException(`Can't find Post with id ${id}`);
         }
-
-        const comment = this.commentRepo.create({
-            content: createDto.content,
-            post,
-            author: user,
-        });
-
-        // Optional parent (for replies)
-        if (createDto.parentId) {
-            const parent = await this.commentRepo.findOne({
-                where: { id: createDto.parentId },
-            });
-
-            if (!parent) {
-                throw new NotFoundException('Parent comment not found');
-            }
-
-            comment.parentComment = parent;
-        }
-
-        return this.commentRepo.save(comment);
+        return post;
     }
 
-    async updateComment(id: number, updateDto: UpdateCommentDto, user: User,): Promise<Comment> {
-        const comment = await this.commentRepo.findOne({
-            where: { id },
-            relations: ['author'],
-        });
 
-        if (!comment) throw new NotFoundException('Comment not found');
-        if (comment.author.id !== user.id)
-            throw new ForbiddenException('Unauthorized');
-
-        comment.content = updateDto.content || comment.content;
-        return this.commentRepo.save(comment);
-    }
-
-    async deleteComment(id: number, user: User): Promise<void> {
-        const comment = await this.commentRepo.findOne({
-            where: { id },
-            relations: ['author'],
-        });
-
-        if (!comment) throw new NotFoundException('Comment not found');
-        if (comment.author.id !== user.id)
-            throw new ForbiddenException('Unauthorized');
-
-        await this.commentRepo.remove(comment);
-    }
-
-    async getCommentsByPost(postId: number): Promise<Comment[]> {
-        return this.commentRepo.find({
-            where: { post: { id: postId }, parentComment: IsNull() },
-            relations: ['author', 'replies', 'parentComment'],
-            order: { createdAt: 'DESC' },
-        });
-    }
 }
