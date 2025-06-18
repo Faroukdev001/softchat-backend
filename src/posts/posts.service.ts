@@ -48,8 +48,8 @@ export class PostsService {
         const post = await this.postRepository
             .createQueryBuilder('post')
             .leftJoinAndSelect('post.user', 'user')
-            // .leftJoin('post.comments', 'comment_entity')
-            // .loadRelationCountAndMap('post.commentCount', 'post.comments')
+            .leftJoin('post.comments', 'comment_entity')
+            .loadRelationCountAndMap('post.commentCount', 'post.comments')
             .where('post.id = :id', { id })
             .select([
                 'post.id',
@@ -61,7 +61,7 @@ export class PostsService {
                 'user.username',
                 'user.email',
                 'user.thumbnail',
-                // 'COUNT(comment_entity.id) as commentCount',
+                'COUNT(comment_entity.id) as commentCount',
             ])
             .groupBy('post.id')
             .addGroupBy('user.id')
@@ -88,7 +88,7 @@ export class PostsService {
         postInfo.likeCount = post.likes.length;
         postInfo.isLiked = post.likes.includes(email);
         postInfo.isBookmarked = post.bookMarkedUsers.includes(email);
-        // postInfo.commentCount = post.commentCount;
+        postInfo.commentCount = post.commentCount;
 
         // this.logger.verbose(`post : ${postInfo}`);
         return postInfo;
