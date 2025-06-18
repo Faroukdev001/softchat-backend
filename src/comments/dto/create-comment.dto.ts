@@ -1,13 +1,21 @@
-import { IsNotEmpty, IsOptional, IsNumber } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
+import { CommentType } from "../comment-type.enum";
 
 export class CreateCommentDto {
-  @IsNotEmpty()
-  content: string;
 
-  @IsNumber()
-  postId: number;
+    @IsNotEmpty()
+    @IsString()
+    content: string;
+    
+    @IsNotEmpty()
+    @IsNumber()
+    postId: number;
 
-  @IsOptional()
-  @IsNumber()
-  parentId?: number;
+    @IsOptional()
+    parentCommentId?: number;
+    
+    @IsOptional()
+    parentCommentAuthor?: string;
+    
+    
 }

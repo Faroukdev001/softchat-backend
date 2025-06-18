@@ -7,6 +7,7 @@ import { UserListDto } from "./dto/user-list.dto";
 import { UserSimpleInfoIncludingStatusMessageDto } from "./dto/user-simple-info-including-status-message.dto";
 import { unlink } from 'fs/promises';
 import { join } from 'path';
+import { BookMarksDto } from './dto/book-marks.dto';
 
 @Injectable()
 export class UserRepository extends Repository<User> {
@@ -51,6 +52,29 @@ export class UserRepository extends Repository<User> {
         }
     }
 
+    async postBookMark(email: string, postId: number): Promise<BookMarksDto> {
+        const user = await this.findOneBy({ email });
+
+        if (!user) {
+            throw new Error('User not found');
+        }
+
+        var { bookMarks } = user;
+
+        // If it was previously bookmarked, cancel the bookmark
+        if (bookMarks.includes(postId)) {
+            bookMarks = bookMarks.filter((id) => id !== postId);
+        }
+        // If it hadn't been bookmarked yet, proceed with bookmarking.
+        else {
+            bookMarks.push(postId);
+        }
+        user.bookMarks = bookMarks;
+        await this.save(user)
+
+        return { bookMarks };
+    } p
+
     async updateUserThumbnail(email: string, newThumbnailUrl: string): Promise<UpdatedUserThumbnailDto> {
         const user = await this.findOneBy({ email });
         if (!user) {
@@ -81,7 +105,7 @@ export class UserRepository extends Repository<User> {
 
     async deleteThumbnail(user: User): Promise<UpdatedUserThumbnailDto> {
         const defaultThumbnail = "/images/default/dafault_thumbnail.png";
-        
+
         // Delete current thumbnail if it's not the default
         if (user.thumbnail && !user.thumbnail.includes('default')) {
             try {
@@ -127,9 +151,9 @@ export class UserRepository extends Repository<User> {
             .andWhere('user.email <> :email', { email })
             .skip((page - 1) * limit)
             .take(limit);
-        
+
         const [users, total] = await query.getManyAndCount();
-        
+
         const userList: UserSimpleInfoIncludingStatusMessageDto[] = users.map((user: User) => {
             const userInfo: UserSimpleInfoIncludingStatusMessageDto = new UserSimpleInfoIncludingStatusMessageDto();
             userInfo.email = user.email;

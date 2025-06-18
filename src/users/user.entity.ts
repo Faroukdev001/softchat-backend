@@ -1,7 +1,6 @@
 import { Role } from "src/auth/enums/role.enum";
 import { Post } from "src/posts/posts.entity";
 import { Product } from "src/products/product.entity";
-import { Comment } from "src/comments/comment.entity";
 import { BaseEntity, Column, CreateDateColumn, Entity, JoinColumn, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity('users')
@@ -56,9 +55,6 @@ export class User extends BaseEntity{
     followerCount: number;
     
     followingCount: number;
-
-    @OneToMany(() => Comment, (comment) => comment.author)
-    comments: Comment[];
 
     @CreateDateColumn()
     createdAt: Date;

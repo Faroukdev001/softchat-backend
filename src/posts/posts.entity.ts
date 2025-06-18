@@ -10,7 +10,7 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { User } from 'src/users/user.entity';
-import { Comment } from 'src/comments/comment.entity';
+import { CommentEntity } from 'src/comments/comment.entity';
 
 @Entity()
 export class Post {
@@ -27,9 +27,6 @@ export class Post {
   @JoinColumn([{ name: 'userEmail', referencedColumnName: 'email' }])
   user: User;
 
-  @OneToMany(() => Comment, (comment) => comment.post)
-  comments: Comment[];
-
   @CreateDateColumn()
   createdAt: Date;
 
@@ -42,9 +39,9 @@ export class Post {
   @Column('text', { array: true, nullable: false })
   bookMarkedUsers: string[];
 
-  // @OneToMany(() => CommentEntity, comment => comment.post, { eager: true })
-  // @JoinColumn([{ name: 'commentId', referencedColumnName: 'id' }])
-  // comments: CommentEntity[];
+  @OneToMany(() => CommentEntity, comment => comment.post, { eager: true })
+  @JoinColumn([{ name: 'commentId', referencedColumnName: 'id' }])
+  comments: CommentEntity[];
 
-  // commentCount: number;
+  commentCount: number;
 }

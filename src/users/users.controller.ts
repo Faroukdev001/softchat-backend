@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, NotFoundException, Param, ParseIntPipe, Patch, Query, UploadedFile, UseGuards, UseInterceptors, BadRequestException } from '@nestjs/common';
+import { Body, Controller, Delete, Get, NotFoundException, Param, ParseIntPipe, Patch, Query, UploadedFile, UseGuards, UseInterceptors, BadRequestException, Post } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { multerOptions } from '../config/multer.config';
 import { UsersService } from './users.service';
@@ -14,6 +14,7 @@ import { UserInfoIncludingIsFollowingDto } from './dto/user-info-including-isfol
 import { UpdatedUserThumbnailDto } from './dto/updated-user-thumbnail.dto';
 import { StatusMessageDto } from './dto/status-message.dto';
 import { UserListDto } from './dto/user-list.dto';
+import { PostIdDto } from 'src/posts/dto/post-id.dto';
 
 @Controller('users')
 @UseGuards(JwtAuthGuard)
@@ -37,6 +38,14 @@ export class UsersController {
 
     //     return this.userService.getUserInfoByEmail(user.email, userEmail);
     // }
+
+    @Post('/post/bookmark')
+    postBookMark(
+        @GetUser() user: User,
+        @Body() postIdDto: PostIdDto,
+    ): Promise<void> {
+        return this.userService.postBookMark(user.email, postIdDto.postId);
+    }
 
     @Patch('/thumbnail')
     @UseInterceptors(FileInterceptor('file', multerOptions))
@@ -103,11 +112,11 @@ export class UsersController {
 
 
 
-    // @Get(':id')
-    // async getUserProfile(@Param('id') id: number): Promise<UserResponseDto> {
-    //     const user = await this.userService.findById(id);
-    //     if (!user) {
-    //         throw new NotFoundException('User not found');
-    //     }
-    //     return toUserResponseDto(user);
-    // }
+// @Get(':id')
+// async getUserProfile(@Param('id') id: number): Promise<UserResponseDto> {
+//     const user = await this.userService.findById(id);
+//     if (!user) {
+//         throw new NotFoundException('User not found');
+//     }
+//     return toUserResponseDto(user);
+// }

@@ -9,13 +9,15 @@ import { UserInfoDto } from './dto/user-info.dto';
 import { UserInfoIncludingIsFollowingDto } from './dto/user-info-including-isfollowing.dto';
 import { UpdatedUserThumbnailDto } from './dto/updated-user-thumbnail.dto';
 import { UserListDto } from './dto/user-list.dto';
+import { PostRepository } from 'src/posts/posts.repository';
 
 
 // Database Layer
 @Injectable()
 export class UsersService {
     constructor(
-        private userRepo: UserRepository
+        private userRepo: UserRepository,
+        private postsRepository: PostRepository, // Assuming you have a PostsRepository for post-related operations
     ) {}
 
     async getUserInfo(email: string): Promise<UserInfoDto> {
@@ -41,6 +43,13 @@ export class UsersService {
 
     //     return userInfoIncludingIsFollowing;
     // }
+
+    async postBookMark(email: string, postId: number): Promise<void> {
+    const bookMarks = await this.userRepo.postBookMark(email, postId);
+    if (bookMarks) {
+        await this.postsRepository.postBookMark(email, postId);
+        }
+    }
 
     async updateUserThumbnail(email: string, newThumbnailUrl: string): Promise<UpdatedUserThumbnailDto> {
         return await this.userRepo.updateUserThumbnail(email, newThumbnailUrl);

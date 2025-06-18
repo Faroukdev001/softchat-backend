@@ -1,43 +1,46 @@
-import {
-    Entity,
-    PrimaryGeneratedColumn,
-    Column,
-    ManyToOne,
-    CreateDateColumn,
-    UpdateDateColumn,
-    OneToMany,
-  } from 'typeorm';
-  import { User } from 'src/users/user.entity';
-  import { Post } from 'src/posts/posts.entity';
-// import { CommentLike } from './commentLikes.entity';
-  
-  @Entity()
-  export class Comment {
+import { BaseEntity, Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { CommentType } from "./comment-type.enum";
+import { Post } from "src/posts/posts.entity";
+import { User } from "src/users/user.entity";
+
+@Entity()
+export class CommentEntity extends BaseEntity {
+
     @PrimaryGeneratedColumn()
     id: number;
-  
+
     @Column()
     content: string;
-  
-    @ManyToOne(() => User, (user) => user.comments)
-    author: User;
-  
-    @ManyToOne(() => Post, (post) => post.comments, { onDelete: 'CASCADE' })
-    post: Post;
-  
-    @ManyToOne(() => Comment, (comment) => comment.replies, { onDelete: 'CASCADE' })
-    parentComment?: Comment;
-  
-    @OneToMany(() => Comment, (comment) => comment.parentComment)
-    replies: Comment[];
-  
-    // @OneToMany(() => CommentLike, (like) => like.comment)
-    // likes: CommentLike[];
 
-    @CreateDateColumn()
+    @Column({ type: 'enum', enum: CommentType })
+    type: CommentType;
+
+    @Column({ nullable: true })
+    parentCommentId: number;
+
+    @Column({ nullable: true })
+    parentCommentAuthor: string;
+
+    @ManyToOne(() => CommentEntity, comment => comment.childComments)
+    @JoinColumn({ name: 'parentCommentId' })
+    parentComment: CommentEntity;
+  
+    @OneToMany(() => CommentEntity, comment => comment.parentComment)
+    childComments: CommentEntity[];
+    
+    @ManyToOne(() => Post, (post) => post.comments, { eager: false })
+    @JoinColumn([{ name: 'postId', referencedColumnName: 'id' }])
+    post: Post;
+    
+    @ManyToOne(() => User, (user) => user.posts, { eager: false })
+    @JoinColumn([{ name: 'userEmail', referencedColumnName: 'email' }])
+    user: User;
+
+    @Column()
     createdAt: Date;
-  
-    @UpdateDateColumn()
+
+    @Column()
     updatedAt: Date;
-  }
-  
+
+    childrenCount: number;
+}
