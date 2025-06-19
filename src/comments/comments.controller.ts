@@ -9,33 +9,23 @@ import {
     UseGuards,
     ParseIntPipe,
     Query,
-  } from '@nestjs/common';
-  import { CommentService } from './comments.service';
-  import { CreateCommentDto } from './dto/create-comment.dto';
-import { CreateDummyCommentsDto } from './dto/create-dummy-comments.dto';
-  import { UpdateCommentDto } from './dto/update-comment.dto';
-  import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-  import { GetUser } from 'src/auth/decorators/get-user.decorator';
-  import { User } from 'src/users/user.entity';
+} from '@nestjs/common';
+import { CommentService } from './comments.service';
+import { CreateCommentDto } from './dto/create-comment.dto';
+import { UpdateCommentDto } from './dto/update-comment.dto';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { GetUser } from 'src/auth/decorators/get-user.decorator';
+import { User } from 'src/users/user.entity';
 import { CommentInfoDto, CommentInfoListDto } from './dto/comment-info.dto';
-import { CreateDummyCommentDto } from './dto/create-dummy-comment.dto';
-  
-  @UseGuards(JwtAuthGuard)
-  @Controller('comments')
-  export class CommentsController {
-    constructor(private commentService: CommentService) {}
 
-    @Post('dummy')
-    createDummyComments(
-        @Body() createDummyCommentsDto: CreateDummyCommentsDto,
-        @GetUser() user: User,
-    ): Promise<{ message: string }> {
-        return this.commentService.createDummyComments(createDummyCommentsDto, user);
-    }
-  
+@UseGuards(JwtAuthGuard)
+@Controller('comments')
+export class CommentsController {
+    constructor(private commentService: CommentService) { }
+
     @Post('/')
     createComment(
-        @Body() createCommentDto: CreateCommentDto, 
+        @Body() createCommentDto: CreateCommentDto,
         @GetUser() user: User,
     ): Promise<CommentInfoDto> {
         return this.commentService.createComment(createCommentDto, user);
@@ -68,7 +58,7 @@ import { CreateDummyCommentDto } from './dto/create-dummy-comment.dto';
         return this.commentService.updateComment(updateCommentDto, user);
     }
 
-  
+
     @Delete('/:id')
     deleteComment(
         @Param('id', ParseIntPipe) id: number,
@@ -79,5 +69,4 @@ import { CreateDummyCommentDto } from './dto/create-dummy-comment.dto';
 
 
 
-  }
-  
+}

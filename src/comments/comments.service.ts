@@ -2,7 +2,6 @@ import { Injectable, Logger, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { CommentRepository } from "./comment.repository";
 import { CreateCommentDto } from './dto/create-comment.dto';
-import { CreateDummyCommentsDto } from './dto/create-dummy-comments.dto';
 import { faker } from '@faker-js/faker';
 import { CommentInfoDto, CommentInfoListDto } from "./dto/comment-info.dto";
 import { UpdateCommentDto } from "./dto/update-comment.dto";
@@ -11,6 +10,7 @@ import { PostRepository } from "src/posts/posts.repository";
 import { UserRepository } from "src/users/user.repository";
 import { User } from "src/users/user.entity";
 import { Post } from "src/posts/posts.entity";
+import { CreateDummyCommentsDto } from "./dto/create-dummy-comment.dto";
 
 @Injectable()
 export class CommentService {
@@ -22,8 +22,8 @@ export class CommentService {
         @InjectRepository(UserRepository)
         private userRepository: UserRepository,
         @InjectRepository(AuthRepository)
-        private authRepository: AuthRepository) { }
-
+        private authRepository: AuthRepository,
+    ) { }
     async createDummyComments(createDummyCommentsDto: CreateDummyCommentsDto, user: User): Promise<{ message: string }> {
         const { postId, commentCount, repliesPerComment = 2 } = createDummyCommentsDto;
         const post = await this.getPostById(postId);
@@ -43,10 +43,10 @@ export class CommentService {
                 await this.createComment(replyDto, user);
             }
         }
-
         return { message: `Created ${commentCount} comments with ${repliesPerComment} replies each` };
     }
 
+    // private logger = new Logger('CommentService');
 
     async createComment(createCommentDto: CreateCommentDto, user: User): Promise<CommentInfoDto> {
         const post = await this.getPostById(createCommentDto.postId);
@@ -72,16 +72,22 @@ export class CommentService {
         const result = await this.commentRepository.delete({ id, user });
 
         if (result.affected === 0) {
+            // this.logger.error(`Can't find comment with id ${id}`);
             throw new NotFoundException(`Can't find comment with id ${id}`);
         }
+
+        // this.logger.verbose(`result ${result}`);
     }
 
     async getPostById(id: number): Promise<Post> {
         const post = await this.postRepository.findOne({ where: { id } });
 
         if (!post) {
+            // this.logger.error(`Can't find Post with id ${id}`);
             throw new NotFoundException(`Can't find Post with id ${id}`);
         }
+
+        // this.logger.verbose(`post : ${post}`);
         return post;
     }
 
