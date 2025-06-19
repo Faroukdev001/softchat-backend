@@ -1,4 +1,5 @@
 import { Role } from "src/auth/enums/role.enum";
+import { Follow } from "src/follow/follow.entity";
 import { Post } from "src/posts/posts.entity";
 import { Product } from "src/products/product.entity";
 import { BaseEntity, Column, CreateDateColumn, Entity, JoinColumn, OneToMany, PrimaryGeneratedColumn } from "typeorm";
@@ -44,11 +45,11 @@ export class User extends BaseEntity{
     // @OneToMany(() => MessageEntity, message => message.sender)
     // messages: MessageEntity[];
 
-    // @OneToMany(() => Follow, follow => follow.follower)
-    // followings: Follow[];
+    @OneToMany(() => Follow, follow => follow.follower)
+    followings: Follow[];
 
-    // @OneToMany(() => Follow, follow => follow.following)
-    // followers: Follow[];
+    @OneToMany(() => Follow, follow => follow.following)
+    followers: Follow[];
 
     totalPostCount: number;
     
