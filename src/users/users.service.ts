@@ -10,6 +10,7 @@ import { UserInfoIncludingIsFollowingDto } from './dto/user-info-including-isfol
 import { UpdatedUserThumbnailDto } from './dto/updated-user-thumbnail.dto';
 import { UserListDto } from './dto/user-list.dto';
 import { PostRepository } from 'src/posts/posts.repository';
+import { FollowRepository } from 'src/follow/follow.repository';
 
 
 // Database Layer
@@ -18,6 +19,7 @@ export class UsersService {
     constructor(
         private userRepo: UserRepository,
         private postsRepository: PostRepository, // Assuming you have a PostsRepository for post-related operations
+        private followRepository: FollowRepository,
     ) {}
 
     async getUserInfo(email: string): Promise<UserInfoDto> {
@@ -25,24 +27,24 @@ export class UsersService {
         return userInfo;
     }
 
-    // async getUserInfoByEmail(myEmail: string, userEmail: string): Promise<UserInfoIncludingIsFollowingDto> {
-    //     const userInfoIncludingIsFollowing = new UserInfoIncludingIsFollowingDto();
+    async getUserInfoByEmail(myEmail: string, userEmail: string): Promise<UserInfoIncludingIsFollowingDto> {
+        const userInfoIncludingIsFollowing = new UserInfoIncludingIsFollowingDto();
 
-    //     const userInfo = await this.userRepo.getUserInfo(userEmail);
-    //     userInfoIncludingIsFollowing.email = userInfo.email
-    //     userInfoIncludingIsFollowing.username = userInfo.username
-    //     userInfoIncludingIsFollowing.thumbnail = userInfo.thumbnail
-    //     userInfoIncludingIsFollowing.bookMarks = userInfo.bookMarks
-    //     userInfoIncludingIsFollowing.statusMessage = userInfo.statusMessage
-    //     userInfoIncludingIsFollowing.totalPostCount = userInfo.totalPostCount
-    //     userInfoIncludingIsFollowing.followerCount = userInfo.followerCount
-    //     userInfoIncludingIsFollowing.followingCount = userInfo.followingCount
+        const userInfo = await this.userRepo.getUserInfo(userEmail);
+        userInfoIncludingIsFollowing.email = userInfo.email
+        userInfoIncludingIsFollowing.username = userInfo.username
+        userInfoIncludingIsFollowing.thumbnail = userInfo.thumbnail
+        userInfoIncludingIsFollowing.bookMarks = userInfo.bookMarks
+        userInfoIncludingIsFollowing.statusMessage = userInfo.statusMessage
+        userInfoIncludingIsFollowing.totalPostCount = userInfo.totalPostCount
+        userInfoIncludingIsFollowing.followerCount = userInfo.followerCount
+        userInfoIncludingIsFollowing.followingCount = userInfo.followingCount
 
-    //     const isFollowing = await this.followRepository.getIsFollowing(myEmail, userEmail);
-    //     userInfoIncludingIsFollowing.isFollowing = isFollowing;
+        const isFollowing = await this.followRepository.getIsFollowing(myEmail, userEmail);
+        userInfoIncludingIsFollowing.isFollowing = isFollowing;
 
-    //     return userInfoIncludingIsFollowing;
-    // }
+        return userInfoIncludingIsFollowing;
+    }
 
     async postBookMark(email: string, postId: number): Promise<void> {
     const bookMarks = await this.userRepo.postBookMark(email, postId);

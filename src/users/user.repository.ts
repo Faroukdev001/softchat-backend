@@ -19,20 +19,26 @@ export class UserRepository extends Repository<User> {
         const user = await this
             .createQueryBuilder("user")
             .where("user.email = :email", { email })
-            // .leftJoin('user.followings', 'follow')
-            // .loadRelationCountAndMap('user.followerCount', 'user.followers')
-            // .loadRelationCountAndMap('user.followingCount', 'user.followings')
+            .leftJoin('user.followings', 'follow')
+            .loadRelationCountAndMap('user.followerCount', 'user.followers')
+            .loadRelationCountAndMap('user.followingCount', 'user.followings')
             .select([
                 "user.email",
                 "user.username",
                 "user.thumbnail",
                 "user.bookMarks",
                 "user.statusMessage",
-                "user.softPoints"
-                // "COUNT(follow.id) AS followerCount",
-                // "COUNT(follow.id) AS followingCount",
+                "user.softPoints",
+                "COUNT(follow.id) AS followerCount",
+                "COUNT(follow.id) AS followingCount",
             ])
             .getOne();
+        const post = this
+            .createQueryBuilder('user')
+            .where('user.email = :email', { email })
+            .select('COUNT(post.id)', 'totalPostCount');
+
+        const [{ totalPostCount }] = await post.getRawMany();
 
         if (user) {
             let userInfo: UserInfoDto = new UserInfoDto();
@@ -42,9 +48,9 @@ export class UserRepository extends Repository<User> {
             userInfo.bookMarks = user.bookMarks;
             userInfo.statusMessage = user.statusMessage;
             userInfo.softPoints = user.softPoints;
-            // userInfo.totalPostCount = isNaN(parseInt(totalPostCount, 10)) ? 0 : parseInt(totalPostCount, 10);
-            // userInfo.followerCount = user.followerCount;
-            // userInfo.followingCount = user.followingCount;
+            userInfo.totalPostCount = isNaN(parseInt(totalPostCount, 10)) ? 0 : parseInt(totalPostCount, 10);
+            userInfo.followerCount = user.followerCount;
+            userInfo.followingCount = user.followingCount;
             return userInfo;
         }
         else {
