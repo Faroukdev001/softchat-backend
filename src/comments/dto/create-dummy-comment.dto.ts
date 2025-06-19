@@ -1,14 +1,15 @@
-import { IsNotEmpty, IsOptional } from "class-validator";
+import { IsNotEmpty, IsNumber, IsOptional } from 'class-validator';
 
-export class CreateDummyCommentDto {
-
+export class CreateDummyCommentsDto {
     @IsNotEmpty()
+    @IsNumber()
     postId: number;
 
+    @IsNotEmpty()
+    @IsNumber()
+    commentCount: number;
+
     @IsOptional()
-    parentCommentId?: number;
-    
-    @IsOptional()
-    parentCommentAuthor?: string;
-    
+    @IsNumber()
+    repliesPerComment?: number;
 }
