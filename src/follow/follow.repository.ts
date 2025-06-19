@@ -52,14 +52,16 @@ export class FollowRepository extends Repository<Follow> {
 
     async cancelFollowing(follower: string, following: string): Promise<void> {
         try {
-            await this.createQueryBuilder('follow')
-                .leftJoin('follow.follower', 'follower')
-                .leftJoin('follow.following', 'following')
-                .delete()
-                .from(Follow)
+            const followRecord = await this.createQueryBuilder('follow')
+                .leftJoinAndSelect('follow.follower', 'follower')
+                .leftJoinAndSelect('follow.following', 'following')
                 .where('follower.email = :follower', { follower })
                 .andWhere('following.email = :following', { following })
-                .execute();
+                .getOne();
+
+            if (followRecord) {
+                await this.remove(followRecord);
+            }
         } catch (error) {
             throw new Error(`Failed to unfollow: ${error.message}`);
         }
