@@ -5,9 +5,9 @@ export class UserInfoDto {
     thumbnail: string;
     bookMarks: number[];
     statusMessage: string;
-    // totalPostCount: number;
-    // followerCount: number;
-    // followingCount: number;
+    totalPostCount: number;
+    followerCount: number;
+    followingCount: number;
     softPoints: number;
     // softPoints: number;
     
